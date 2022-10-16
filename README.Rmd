@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of TextEvalR is to ...
+Implementation of text-evaluation metric BLEU [Papineni et al, 2002](https://aclanthology.org/P02-1040.pdf)
 
 ## Installation
 
@@ -33,7 +33,7 @@ You can install the development version of TextEvalR like so:
 This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
-library(TextEvalR)
+# library(TextEvalR)
 ## basic example code
 ```
 
