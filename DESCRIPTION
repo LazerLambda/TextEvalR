@@ -1,0 +1,18 @@
+Package: TextEvalR
+Type: Package
+Title: TextEvalR - Evaluation Metrics for Generated Text in R
+Version: 0.1.1
+Author: Philipp Koch
+Maintainer: Philipp Koch <P.Koch@campus.lmu.de>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    checkmate,
+    tokenizers
+Suggests:
+    testthat (>= 3.0.0)
+RoxygenNote: 7.2.1
+Config/testthat/edition: 3
