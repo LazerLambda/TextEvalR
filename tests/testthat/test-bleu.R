@@ -31,18 +31,6 @@ test_that("Test `eff_ref_len`.", {
   expect_equal(sum(df$eff_ref_len), 29)
 })
 
-test_that("Test `combine_n_grams`.", {
-  test_vec <- c("military", "always", "obeys")
-  expect_error(combine_n_grams(list("military", "always", "obeys"), 2))
-  expect_equal(
-    combine_n_grams(test_vec, 3),
-    list(c("military", "always", "obeys")))
-  expect_equal(
-    combine_n_grams(test_vec, 2),
-    list(c("military", "always"), c("always", "obeys")))
-  expect_warning(combine_n_grams(test_vec, 4))
-})
-
 test_that("Test `brevity_penalty`.", {
   df <- construct_df(ref, cand)
   df <- tokenize_df(df)

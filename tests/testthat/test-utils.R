@@ -44,3 +44,30 @@ test_that("Test `tokenize_df` with different n-grams.", {
     TRUE))
 })
 
+test_that("Test `combine_n_grams`.", {
+  test_vec <- c("military", "always", "obeys")
+  expect_error(combine_n_grams(list("military", "always", "obeys"), 2))
+  expect_equal(
+    combine_n_grams(test_vec, 3),
+    list(c("military", "always", "obeys")))
+  expect_equal(
+    combine_n_grams(test_vec, 2),
+    list(c("military", "always"), c("always", "obeys")))
+  expect_warning(combine_n_grams(test_vec, 4))
+})
+
+test_that("Test `combine_n_grams_list`.", {
+  test_list <- list(
+    c("military", "always", "obeys"),
+    c("military", "always", "obeys"))
+  expect_equal(
+    combine_n_grams_list(test_list, 3),
+    list(
+      list(c("military", "always", "obeys")),
+      list(c("military", "always", "obeys"))))
+  expect_equal(
+    combine_n_grams_list(test_list, 2),
+    list(
+      list(c("military", "always"), c("always", "obeys")),
+      list(c("military", "always"), c("always", "obeys"))))
+})

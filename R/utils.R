@@ -63,11 +63,47 @@ construct_df <- function(reference, candidate) {
 
 tokenize_df <- function(df, n = 1, tokenize = TRUE) {
   checkmate::check_data_frame(df)
-  if (!tokenize) {
-    df$ref_tok_1 <- df$ref
-    df$ref_cand_1 <- df$cand
-    return(df)
-  }
+  # if (!tokenize) {
+  #   df$ref_tok_1 <- df$ref
+  #   df$ref_cand_1 <- df$cand
+  #   return(df)
+  # }
+  # if (n == 1) {
+  #   df["ref_tok_1"] <- list(apply(
+  #     df,
+  #     1,
+  #     function(e) {
+  #       return(tokenizers::tokenize_ngrams(e$ref, n = n))
+  #     }))
+  #   df["cand_tok_1"] <- list(apply(
+  #     df,
+  #     1,
+  #     function(e) {
+  #       return(tokenizers::tokenize_ngrams(e$cand, n = n))
+  #     }
+  #   ))
+  # } else {
+  #   i_ref <- which(names(df) == "ref_tok_1")
+  #   col_name <- paste("ref_tok", as.character(n), sep = "_")
+  #   df[col_name] <- apply(
+  #     df,
+  #     1,
+  #     function(e) {
+  #       return(combine_n_grams_list(e[[i_ref]], n = n))
+  #     }
+  #   )
+  #   i_cand <- which(names(df) == "cand_tok_1")
+  #   col_name <- paste("cand_tok", as.character(n), sep = "_")
+  #   df[col_name] <- apply(
+  #     df,
+  #     1,
+  #     function(e) {
+  #       return(combine_n_grams(unlist(e[[i_cand]]), n = n))
+  #     }
+  #   )
+  # }
+  # return(df)
+
   col_name <- paste("ref_tok", as.character(n), sep = "_")
   df[col_name] <- list(apply(
     df,
@@ -76,6 +112,7 @@ tokenize_df <- function(df, n = 1, tokenize = TRUE) {
       return(tokenizers::tokenize_ngrams(e$ref, n = n))
     }
   ))
+
   col_name <- paste("cand_tok", as.character(n), sep = "_")
   df[col_name] <- list(apply(
     df,
@@ -85,6 +122,12 @@ tokenize_df <- function(df, n = 1, tokenize = TRUE) {
     }
   ))
   return(df)
+}
+
+combine_n_grams_list <- function(ngrams_l, n) {
+  checkmate::expect_list(ngrams_l, types = c("character"))
+  return_val <- lapply(ngrams_l, function(e) combine_n_grams(e, n))
+  return(return_val)
 }
 
 combine_n_grams <- function(ngrams, n) {

@@ -99,6 +99,8 @@ mod_prec_atomic <- function(ref, cand) {
 
   cand_occ <- as.data.frame(table(cand))
   ref_occ <- ref_n_gram_count(ref)
+  print(names(ref_occ))
+  print(names(cand_occ))
   combined <- merge(
     ref_occ,
     cand_occ,
@@ -133,6 +135,7 @@ mod_prec_atomic <- function(ref, cand) {
 #' @return Modified precision for provided corpus.
 mod_prec <- function(df_loc) {
   checkmate::expect_data_frame(df_loc)
+  # print(df_loc[[1]])
 
   sums <- apply(df_loc, 1, function(e) mod_prec_atomic(e[[1]], e[[2]]))
 
