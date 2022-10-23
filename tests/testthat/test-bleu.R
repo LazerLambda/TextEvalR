@@ -7,31 +7,6 @@ ref2 <- c('he was interested in world history because he read the book')
 ref <- list(ref1, ref2)
 cand <- c(cand1, cand2)
 
-test_that("Test `construct_df`.", {
-  df <- construct_df(ref, cand)
-  expect_equal(nrow(df), 2)
-})
-
-test_that("Test `tokenize_df`.", {
-  df <- construct_df(ref, cand)
-  df <- tokenize_df(df)
-  expect_subset(c('ref_tok_1', 'cand_tok_1'), names(df))
-})
-
-test_that("Test `tokenize_df` with different n-grams.", {
-  df <- construct_df(ref, cand)
-  df <- tokenize_df(df)
-  df <- tokenize_df(df, n = 2)
-  df <- tokenize_df(df, n = 3)
-  expect_subset(c(
-    'ref_tok_1',
-    'cand_tok_1',
-    'ref_tok_2',
-    'cand_tok_2',
-    'ref_tok_3',
-    'cand_tok_3'), names(df))
-})
-
 test_that("Test `eff_ref_len_atomic`.", {
   ref <- list(
     c("it", "is", "a", "guide", "to", "action", "that", "ensures", "that", "the", "military", "will", "forever", "heed", "party", "commands"),
@@ -127,4 +102,43 @@ test_that("Test BLEU function based on NLTK example.", {
   expect_equal(c, 0.5045666840058485, tolerance = 0.01)
 })
 
+test_that("Test BLEU function based on WMT 22 samples computed by NLTK.", {
+  ref <- list(c("The goods cost less than 20 euros.",
+                "The merchandise was less than 20 EURO."),
+              c("The fee would equal 40% of the value of the goods...",
+                "The fee corresponds with 40 % of the goods’ value..."),
+              c("I am #PRS_ORG# a serious customer and that is why it is not a problem for me.",
+                "I am a major client of #PRS_ORG# and thus it is no problem for me."),
+              c("I just need a number or a instructions what I should attach to the package so that it can be traced by you all as a return.",
+                "I need only a number or instructions for what to attach to the package so you could track the return with that."),
+              c("I ordered the #PRS_ORG# a few days ago...for €249.",
+                "A few days ago I ordered the #PRS_ORG# for € 249."),
+              c("Now it costs €179.",
+                "Today the item costs € 179."),
+              c("That really bothers me, I must say.",
+                "To be honest, I find this very unfair."))
+  cand <- c("The goods cost less than 20 euros.",
+            "The fee corresponds to 40% of the value of the goods....",
+            "I'm a #PRS_ORG# major customer so it's not a problem for me.",
+            "All I need is a number or instructions on what to include in the package so that it can be tracked by you as a return.",
+            "I ordered the #PRS_ORG# a few days ago... for 249€.",
+            "Today it costs 179€.",
+            "To be honest, I find this very annoying.")
+  c <- bleu_c(ref, cand)
+  expect_equal(c, 0.5958573576913339, tolerance = 0.01)
+})
+
+test_that("Test BLEU function based on WMT 22 samples computed by NLTK II.", {
+  ref <- list(c("The goods cost less than 20 euros.",
+                "The merchandise was less than 20 EURO."),
+              c("The fee would equal 40% of the value of the goods...",
+                "The fee corresponds with 40 % of the goods’ value..."),
+              c("I am #PRS_ORG# a serious customer and that is why it is not a problem for me.",
+                "I am a major client of #PRS_ORG# and thus it is no problem for me."))
+  cand <- c("The goods cost less than 20 euros.",
+            "The fee corresponds to 40% of the value of the goods....",
+            "I'm a #PRS_ORG# major customer so it's not a problem for me.")
+  c <- bleu_c(ref, cand)
+  expect_equal(c, 0.5727104863931309, tolerance = 0.01)
+})
 # TODO: Test eff ref len atomic

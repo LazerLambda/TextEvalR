@@ -1,41 +1,27 @@
 library(tokenizers)
 library(checkmate)
 
-construct_df <- function(reference, candidate) {
-  checkmate::check_character(candidate)
-  checkmate::expect_list(reference, types = "character")
-  df <- data.frame(cand = candidate)
-  df$ref <- reference
-  return(df)
-}
-
-tokenize_df <- function(df, n = 1) {
-  checkmate::check_data_frame(df)
-  col_name <- paste("ref_tok", as.character(n), sep = '_')
-  df[col_name] <- list(apply(
-    df,
-    1,
-    function(e) {
-      return(tokenizers::tokenize_ngrams(e$ref, n = n))
-    }
-  ))
-  col_name <- paste("cand_tok", as.character(n), sep = '_')
-  df[col_name] <- list(apply(
-    df,
-    1,
-    function(e) {
-      return(tokenizers::tokenize_ngrams(e$cand, n = n))
-    }
-  ))
-  return(df)
-}
-
+#' Add length of Candidates to Dataframe.
+#'
+#' New column is added and filled with length of unigrams of candidate.
+#' The length of the sentence in token count is used here.
+#'
+#' @param df data.frame including cand_tok_1 column with tokenized unigrams.
+#' @returns Modified data.frame.
 add_cand_length <- function(df) {
   df$cand_len <- unlist(
-    lapply(df$cand_tok_1, function(e) {length(e[[1]])}))
+    lapply(df$cand_tok_1, function(e) length(e[[1]])))
   return(df)
 }
 
+#' Compute Effective Reference Length for Each Pair.
+#'
+#' Get all length of references and choose the length which is closest to
+#' the length of the candidate sentence (effective refence length).
+#'
+#' @param cand_len length of the candidate sentence.
+#' @param reference List of reference sentences.
+#' @returns Effective reference length.
 eff_ref_len_atomic <- function(cand_len, reference) {
   # TODO Test
   ref_lengths <- vapply(reference, length, numeric(1))
@@ -43,11 +29,19 @@ eff_ref_len_atomic <- function(cand_len, reference) {
   return(ref_lengths[[ref_length_ind]])
 }
 
+#' Add Effective Reference Length to data.frame.
+#'
+#' Add effective reference length to data.frame using the eff_ref_len_atomic
+#' function. Only chose unigrams as described in the Papineni et al., 2002.
+#'
+#' @param df data.frame including already added cand_len and tokenized ref token
+#' in column ref_tok_1.
+#' @returns Modified data.frame.
 add_eff_ref_len <- function(df) {
   i_cand_len <- which(names(df) == "cand_len")
   i_ref_tok <- which(names(df) == "ref_tok_1")
   df$eff_ref_len <- unlist(
-    apply(df, 1, function(e){
+    apply(df, 1, function(e) {
       eff_ref_len_atomic(
         e[[i_cand_len]],
         e[[i_ref_tok]])
@@ -56,6 +50,14 @@ add_eff_ref_len <- function(df) {
   return(df)
 }
 
+#' Compute Brevity Penalty
+#'
+#' Compute brevity penalty according to Papineni et al., 2002. Returns 0 iff
+#' candidate length is 0. Provided data.frame must include previously computed
+#' effective reference length column (eff_ref_len) and candidate length
+#' (cand_len).
+#' @param df data.frame including already added cand_len and eff_ref_len.
+#' @returns Modified data.frame.
 brevity_penalty <- function(df) {
   r <- sum(df$eff_ref_len)
   c <- sum(df$cand_len)
@@ -69,36 +71,13 @@ brevity_penalty <- function(df) {
   }
 }
 
-combine_n_grams <- function(ngrams, n) {
-  checkmate::expect_atomic_vector(ngrams)
-  if (n > length(ngrams)) {
-    n <- length(ngrams)
-    warning("`n` longer than length of tokens. `n` set to length of tokens.")
-  }
-  indices <- lapply(1:n, function(e) {e:length(ngrams)})
-  tokens <- lapply(
-    indices,
-    function(e) {
-      append(
-        ngrams[e],
-      rep(NA, length(ngrams) - length(e)))
-    })
-  tmp_df <- as.data.frame(tokens)
-  tmp_df <- na.omit(tmp_df)
-  ngrams_raw <- apply(tmp_df, 1, function(e) {list(unname(e))})
-  new_ngrams <- lapply(ngrams_raw, function(e) {do.call(paste, e)})
-  return(unname(new_ngrams))
-}
-
 #' Get n-gram Frequency Table
 #'
 #' Computes frequency table for n-grams.
 #'
-#' @param reference List of reference sentences.
-#' @param n Determining n-length of n-gram.
+#' @param ref List of reference sentences.
 #' @return Frequency table.s
 ref_n_gram_count <- function(ref) {
-  # TODO: Checkkmate for list input in form of list(vectors)
   n_gram_tables <- lapply(ref, table)
   n_gram_df <- lapply(n_gram_tables, as.data.frame)
   res <- Reduce(function(...) merge(..., all = TRUE, by = "Var1"), n_gram_df)
@@ -106,8 +85,17 @@ ref_n_gram_count <- function(ref) {
   return(res[c("Var1", "max_ref")])
 }
 
+#' Count and Clip n-grams for a Row.
+#'
+#' Occurences are counted and clipped. Clipping is necessary to avoid a higher
+#' candidate token count. Due to the precision-inspired nature, this procedure
+#' consideres the "true positive" occurences.
+#'
+#' @param ref List of reference sentences.
+#' @param cand A candidate sentence.
+#' @return List including nominator and denominator to be divided after
+#' summation.
 mod_prec_atomic <- function(ref, cand) {
-  # TODO Typecheck
 
   cand_occ <- as.data.frame(table(cand))
   ref_occ <- ref_n_gram_count(ref)
@@ -130,46 +118,66 @@ mod_prec_atomic <- function(ref, cand) {
     }
   )
 
-  # Compute modified precision
-  # Freq is frequency of n-grams in candidate
-  denominator <- sum(combined$Freq)
-  nominator <- sum(combined$clipped)
-  # if (denominator == 0) return(0) else
-  # return(nominator / denominator)
   return(list(
     nominator = sum(combined$clipped),
     denominator = sum(combined$Freq)))
 }
 
+#' Compute Modified Precision for N-Gram.
+#'
+#' Compute modified precision based on clipped sums from mod_prec_atomic.
+#' Sum both nominators and denominators and divide fraction.
+#'
+#' @param df_loc Slice of data depending on n-gram size. Must include candidate
+#' and references in same n-gram size.
+#' @return Modified precision for provided corpus.
 mod_prec <- function(df_loc) {
   checkmate::expect_data_frame(df_loc)
 
-  # cand_occurences <- lapply(cand, table)
-  # ref_occurences <-  lapply(ref, ref_n_gram_count)
-
-  sums <- apply(df_loc, 1, function(e){mod_prec_atomic(e[[1]], e[[2]])})
+  sums <- apply(df_loc, 1, function(e) mod_prec_atomic(e[[1]], e[[2]]))
 
   # Get only n-grams that occur in the candidate
   fraction <- Reduce(
     function(acc, e) {
       return(list(
-        nominator=(e$nominator + acc$nominator),
-        denominator=(e$denominator + acc$denominator)))},
+        nominator = (e$nominator + acc$nominator),
+        denominator = (e$denominator + acc$denominator)))},
     sums,
-    list(nominator=0, denominator=0))
+    list(nominator = 0, denominator = 0))
+  if (fraction$denominator == 0) return(0)
   return(fraction$nominator / fraction$denominator)
 }
 
-bleu_c <- function(ref, cand, N = 4, weights = NA) {
+
+#' Compute BLEU (Corpus).
+#'
+#' Compute BLEU for a corpus-based on according to Papineni et al., 2002.
+#'
+#' @param ref List of vectors of references.
+#' @param cand Vector of candidate sentences.
+#' @param n Max n-gram size to be considered (default set to 4).
+#' @param weights Custom weight vector for modified precision for each n-gram
+#' size.
+#' @param tokenize Boolean indicating if tokenization is necessary or has already
+#' been applied.
+#' @return BLEU-Score for provided corpus.
+bleu_c <- function(ref, cand, n = 4, weights = NA, tokenize = TRUE) {
+  checkmate::expect_character(cand)
+  checkmate::expect_list(ref, types = c("character"))
+  checkmate::expect_numeric(n)
+
   df <- construct_df(ref, cand)
   if (is.na(weights)) {
-    weights <- rep(1, N) / N
+    weights <- rep(1, n) / n
+  } else {
+    checkmate::expect_numeric(weights)
   }
   mod_prec_n <- c()
-  for (i in seq_len(N)) {
-    df <- tokenize_df(df, n = i)
-    indices <- tail(names(df), 2)
-    if (i == 1){
+  for (i in seq_len(n)) {
+    df <- tokenize_df(df, n = i, tokenize = tokenize)
+    # TODO: NOT TOKENIZE FOR EVERY N
+    indices <- utils::tail(names(df), 2)
+    if (i == 1) {
       df <- add_cand_length(df)
       df <- add_eff_ref_len(df)
     }
@@ -179,4 +187,18 @@ bleu_c <- function(ref, cand, N = 4, weights = NA) {
   bp <- brevity_penalty(df)
   result <- bp * exp(weights %*% log(mod_prec_n))
   return(result[[1]])
+}
+
+#' Compute BLEU (Sentence).
+#'
+#' Compute BLEU for a sentence-based on according to Papineni et al., 2002.
+#'
+#' @param ref List of vectors of references.
+#' @param cand Vector of candidate sentences.
+#' @param n Max n-gram size to be considered (default set to 4).
+#' @param weights Custom weight vector for modified precision for each n-gram
+#' size.
+#' @return BLEU-Score for provided corpus.
+bleu_s <- function(ref, cand, n = 4, weights = NA) {
+  return(bleu_c(list(ref), cand, n = n, weights = weights))
 }
