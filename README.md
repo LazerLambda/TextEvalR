@@ -19,8 +19,8 @@ devtools::install_github("https://github.com/LazerLambda/TextEvalR")
 
 ## Example
 
-Compute the BLEU-score on a sample from the (WMT 22 Metrics Shared
-Task)\[<https://wmt-metrics-task.github.io/>\].
+Compute the BLEU-score on a sample from the [WMT 22 Metrics Shared
+Task](https://wmt-metrics-task.github.io/).
 
 ``` r
 # library(TextEvalR)
