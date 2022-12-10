@@ -12,9 +12,9 @@ test_that("Test `construct_df`.", {
   expect_equal(nrow(df), 2)
 })
 
-test_that("Test `tokenize_df`.", {
+test_that("Test `process_df`.", {
   df <- construct_df(ref, cand)
-  df <- tokenize_df(df)
+  df <- process_df(df)
   col_names_exp <- c('ref_tok_1', 'cand_tok_1')
   col_names <- names(df)
   cond <- col_names_exp %in% col_names
@@ -24,11 +24,11 @@ test_that("Test `tokenize_df`.", {
     TRUE))
 })
 
-test_that("Test `tokenize_df` with different n-grams.", {
+test_that("Test `process_df` with different n-grams.", {
   df <- construct_df(ref, cand)
-  df <- tokenize_df(df)
-  df <- tokenize_df(df, n = 2)
-  df <- tokenize_df(df, n = 3)
+  df <- process_df(df)
+  df <- process_df(df, n = 2)
+  df <- process_df(df, n = 3)
   col_names_exp <- c(
     'ref_tok_1',
     'cand_tok_1',
@@ -49,10 +49,10 @@ test_that("Test `combine_n_grams`.", {
   expect_error(combine_n_grams(list("military", "always", "obeys"), 2))
   expect_equal(
     combine_n_grams(test_vec, 3),
-    list(c("military", "always", "obeys")))
+    c("military always obeys"))
   expect_equal(
     combine_n_grams(test_vec, 2),
-    list(c("military", "always"), c("always", "obeys")))
+    c("military always", "always obeys"))
   expect_warning(combine_n_grams(test_vec, 4))
 })
 
@@ -63,11 +63,11 @@ test_that("Test `combine_n_grams_list`.", {
   expect_equal(
     combine_n_grams_list(test_list, 3),
     list(
-      list(c("military", "always", "obeys")),
-      list(c("military", "always", "obeys"))))
+       "military always obeys",
+       "military always obeys"))
   expect_equal(
     combine_n_grams_list(test_list, 2),
     list(
-      list(c("military", "always"), c("always", "obeys")),
-      list(c("military", "always"), c("always", "obeys"))))
+      c("military always", "always obeys"),
+      c("military always", "always obeys")))
 })

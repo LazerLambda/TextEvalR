@@ -99,8 +99,6 @@ mod_prec_atomic <- function(ref, cand) {
 
   cand_occ <- as.data.frame(table(cand))
   ref_occ <- ref_n_gram_count(ref)
-  print(names(ref_occ))
-  print(names(cand_occ))
   combined <- merge(
     ref_occ,
     cand_occ,
@@ -135,7 +133,6 @@ mod_prec_atomic <- function(ref, cand) {
 #' @return Modified precision for provided corpus.
 mod_prec <- function(df_loc) {
   checkmate::expect_data_frame(df_loc)
-  # print(df_loc[[1]])
 
   sums <- apply(df_loc, 1, function(e) mod_prec_atomic(e[[1]], e[[2]]))
 
@@ -152,7 +149,7 @@ mod_prec <- function(df_loc) {
 }
 
 
-#' Compute BLEU (Corpus).
+#' Compute BLEU.
 #'
 #' Compute BLEU for a corpus-based on according to Papineni et al., 2002.
 #'
@@ -161,10 +158,29 @@ mod_prec <- function(df_loc) {
 #' @param n Max n-gram size to be considered (default set to 4).
 #' @param weights Custom weight vector for modified precision for each n-gram
 #' size.
-#' @param tokenize Boolean indicating if tokenization is necessary or has already
-#' been applied.
 #' @return BLEU-Score for provided corpus.
-bleu_c <- function(ref, cand, n = 4, weights = NA, tokenize = TRUE) {
+#' @export
+#' @examples
+#' # Corpus
+#' ref <- list(
+#'   c("The goods cost less than 20 euros.",
+#'     "The merchandise was less than 20 EURO."),
+#'   c("The fee would equal 40% of the value of the goods...",
+#'     "The fee corresponds with 40 % of the goods’ value..."),
+#'   c("I am #PRS_ORG# a serious customer and that is why it is not a problem for me.",
+#'     "I am a major client of #PRS_ORG# and thus it is no problem for me."))
+#' cand <- c("The goods cost less than 20 euros.",
+#'     "The fee corresponds to 40% of the value of the goods....",
+#'     "I'm a #PRS_ORG# major customer so it's not a problem for me.")
+#' bleu_score <- bleu(ref, cand)
+#'
+#' # Sentence
+#' ref <- list(
+#'   c("The goods cost less than 20 euros.",
+#'     "The merchandise was less than 20 EURO."))
+#' cand <- c("The goods cost less than 20 euros.")
+#' bleu_score <- bleu(ref, cand)
+bleu <- function(ref, cand, n = 4, weights = NA) {
   checkmate::expect_character(cand)
   checkmate::expect_list(ref, types = c("character"))
   checkmate::expect_numeric(n)
@@ -177,8 +193,8 @@ bleu_c <- function(ref, cand, n = 4, weights = NA, tokenize = TRUE) {
   }
   mod_prec_n <- c()
   for (i in seq_len(n)) {
-    df <- tokenize_df(df, n = i, tokenize = tokenize)
-    # TODO: NOT TOKENIZE FOR EVERY N
+    df <- process_df(df, n = i)
+    # Get recent n-grams for (i)
     indices <- utils::tail(names(df), 2)
     if (i == 1) {
       df <- add_cand_length(df)
@@ -190,18 +206,4 @@ bleu_c <- function(ref, cand, n = 4, weights = NA, tokenize = TRUE) {
   bp <- brevity_penalty(df)
   result <- bp * exp(weights %*% log(mod_prec_n))
   return(result[[1]])
-}
-
-#' Compute BLEU (Sentence).
-#'
-#' Compute BLEU for a sentence-based on according to Papineni et al., 2002.
-#'
-#' @param ref List of vectors of references.
-#' @param cand Vector of candidate sentences.
-#' @param n Max n-gram size to be considered (default set to 4).
-#' @param weights Custom weight vector for modified precision for each n-gram
-#' size.
-#' @return BLEU-Score for provided corpus.
-bleu_s <- function(ref, cand, n = 4, weights = NA) {
-  return(bleu_c(list(ref), cand, n = n, weights = weights))
 }
