@@ -1,5 +1,5 @@
-cand1 = c('It is a guide to action which ensures that the military always obeys the commands of the party')
-ref1 = c('It is a guide to action that ensures that the military will forever heed Party commands',
+cand1 <- c('It is a guide to action which ensures that the military always obeys the commands of the party')
+ref1 <- c('It is a guide to action that ensures that the military will forever heed Party commands',
          'It is the guiding principle which guarantees the military forces always being under the command of the Party',
          'It is the practical guide for the army always to heed the directions of the party')
 cand2 <- c('he read the book because he was interested in world history')
@@ -18,34 +18,22 @@ test_that("Test `eff_ref_len_atomic`.", {
 
 test_that("Test `add_cand_length`.", {
   df <- construct_df(ref, cand)
-  df <- tokenize_df(df)
+  df <- process_df(df)
   df <- add_cand_length(df)
   expect_equal(sum(df$cand_len), 29)
 })
 
 test_that("Test `eff_ref_len`.", {
   df <- construct_df(ref, cand)
-  df <- tokenize_df(df)
+  df <- process_df(df)
   df <- add_cand_length(df)
   df <- add_eff_ref_len(df)
   expect_equal(sum(df$eff_ref_len), 29)
 })
 
-test_that("Test `combine_n_grams`.", {
-  test_vec <- c("military", "always", "obeys")
-  expect_error(combine_n_grams(list("military", "always", "obeys"), 2))
-  expect_equal(
-    combine_n_grams(test_vec, 3),
-    list(c("military", "always", "obeys")))
-  expect_equal(
-    combine_n_grams(test_vec, 2),
-    list(c("military", "always"), c("always", "obeys")))
-  expect_warning(combine_n_grams(test_vec, 4))
-})
-
 test_that("Test `brevity_penalty`.", {
   df <- construct_df(ref, cand)
-  df <- tokenize_df(df)
+  df <- process_df(df)
   df <- add_cand_length(df)
   df <- add_eff_ref_len(df)
   expect_equal(brevity_penalty(df), 1)
@@ -62,7 +50,7 @@ test_that("Test `ref_n_gram_count` for correct clipping of max count", {
 
 test_that("Test `ref_n_gram_count` for lists of lists", {
   df <- construct_df(ref, cand)
-  df <- tokenize_df(df, n = 1)
+  df <- process_df(df, n = 1)
   test_list <- lapply(df$ref_tok_1, function(e) {ref_n_gram_count(e)})
   expect_equal(
     Reduce(
@@ -82,22 +70,22 @@ test_that("Test `mod_prec_atomic` gte 0", {
 
 test_that("Test `mod_prec`.", {
   df <- construct_df(ref, cand)
-  df <- tokenize_df(df)
+  df <- process_df(df)
   mp <- mod_prec(df[tail(names(df), 2)])
   expect_gte(mp, 0)
 })
 
-test_that("Test `bleu_c`.", {
-  bleu_test <- bleu_c(ref, cand)
+test_that("Test `bleu`.", {
+  bleu_test <- bleu(ref, cand)
   expect_gte(bleu_test, 0)
 })
 
 test_that("Test BLEU function based on NLTK example.", {
-  cand = c('It is a guide to action which ensures that the military always obeys the commands of the party')
-  ref = list(c('It is a guide to action that ensures that the military will forever heed Party commands',
-           'It is the guiding principle which guarantees the military forces always being under the command of the Party',
-           'It is the practical guide for the army always to heed the directions of the party'))
-  c <- bleu_c(ref, cand)
+  cand = c("It is a guide to action which ensures that the military always obeys the commands of the party")
+  ref = list(c("It is a guide to action that ensures that the military will forever heed Party commands",
+           "It is the guiding principle which guarantees the military forces always being under the command of the Party",
+           "It is the practical guide for the army always to heed the directions of the party"))
+  c <- bleu(ref, cand)
 
   expect_equal(c, 0.5045666840058485, tolerance = 0.01)
 })
@@ -124,7 +112,7 @@ test_that("Test BLEU function based on WMT 22 samples computed by NLTK.", {
             "I ordered the #PRS_ORG# a few days ago... for 249€.",
             "Today it costs 179€.",
             "To be honest, I find this very annoying.")
-  c <- bleu_c(ref, cand)
+  c <- bleu(ref, cand)
   expect_equal(c, 0.5958573576913339, tolerance = 0.01)
 })
 
@@ -138,7 +126,6 @@ test_that("Test BLEU function based on WMT 22 samples computed by NLTK II.", {
   cand <- c("The goods cost less than 20 euros.",
             "The fee corresponds to 40% of the value of the goods....",
             "I'm a #PRS_ORG# major customer so it's not a problem for me.")
-  c <- bleu_c(ref, cand)
+  c <- bleu(ref, cand)
   expect_equal(c, 0.5727104863931309, tolerance = 0.01)
 })
-# TODO: Test eff ref len atomic

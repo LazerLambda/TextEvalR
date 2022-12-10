@@ -1,11 +1,11 @@
 Package: TextEvalR
 Type: Package
-Title: TextEvalR - Evaluation Metrics for Generated Text in R
+Title: TextEvalR - Evaluation Metrics for Generated Text
 Version: 0.1.1
 Author: Philipp Koch
 Maintainer: Philipp Koch <P.Koch@campus.lmu.de>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Package to provide text-evaluation metrics for the R ecosystem.
+    This package includes the BLEU-score so far. More metrics are planned.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
