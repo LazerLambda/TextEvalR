@@ -13,9 +13,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-# TextEvalR (WIP)
+# TextEvalR
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/LazerLambda/TextEvalR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/LazerLambda/TextEvalR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Implementation of text-evaluation metric BLEU [Papineni et al, 2002](https://aclanthology.org/P02-1040.pdf) in *R*.

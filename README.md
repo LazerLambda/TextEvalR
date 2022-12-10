@@ -1,9 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# TextEvalR (WIP)
+# TextEvalR
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/LazerLambda/TextEvalR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/LazerLambda/TextEvalR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Implementation of text-evaluation metric BLEU [Papineni et al,
