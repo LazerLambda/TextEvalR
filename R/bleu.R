@@ -191,6 +191,7 @@ bleu <- function(ref, cand, n = 4, weights = NA) {
   } else {
     checkmate::expect_numeric(weights)
   }
+
   mod_prec_n <- c()
   for (i in seq_len(n)) {
     df <- process_df(df, n = i)

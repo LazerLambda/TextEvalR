@@ -129,3 +129,10 @@ test_that("Test BLEU function based on WMT 22 samples computed by NLTK II.", {
   c <- bleu(ref, cand)
   expect_equal(c, 0.5727104863931309, tolerance = 0.01)
 })
+
+test_that("Test BLEU function on negative example.", {
+  ref <- list(c("That's good.", "Incredible result."))
+  cand <- c("It is great.")
+  c <- bleu(ref, cand, n = 2)
+  expect_equal(c, 0, tolerance = 0.01)
+})
