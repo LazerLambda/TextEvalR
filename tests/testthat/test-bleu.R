@@ -39,6 +39,22 @@ test_that("Test `brevity_penalty`.", {
   expect_equal(brevity_penalty(df), 1)
 })
 
+test_that("Test `brevity_penalty` with empty candidate.", {
+  ref <- list(c("That's good.", "Incredible result."))
+  cand <- c("")
+  df <- construct_df(ref, cand)
+  df <- process_df(df)
+  df <- add_cand_length(df)
+  df <- add_eff_ref_len(df)
+  expect_equal(brevity_penalty(df), 0)
+})
+
+test_that("Test with empty references.", {
+  ref <- list(c(""))
+  cand <- c("Incredible result.")
+  expect_error(bleu(df))
+})
+
 test_that("Test `ref_n_gram_count` for correct clipping of max count", {
   n_grams_list <- tokenizers::tokenize_ngrams(ref[[1]], n = 1)
   counts <- ref_n_gram_count(n_grams_list)
@@ -128,4 +144,25 @@ test_that("Test BLEU function based on WMT 22 samples computed by NLTK II.", {
             "I'm a #PRS_ORG# major customer so it's not a problem for me.")
   c <- bleu(ref, cand)
   expect_equal(c, 0.5727104863931309, tolerance = 0.01)
+})
+
+test_that("Test BLEU function based on WMT 22 samples computed by NLTK II with weights.", {
+  ref <- list(c("The goods cost less than 20 euros.",
+                "The merchandise was less than 20 EURO."),
+              c("The fee would equal 40% of the value of the goods...",
+                "The fee corresponds with 40 % of the goods’ value..."),
+              c("I am #PRS_ORG# a serious customer and that is why it is not a problem for me.",
+                "I am a major client of #PRS_ORG# and thus it is no problem for me."))
+  cand <- c("The goods cost less than 20 euros.",
+            "The fee corresponds to 40% of the value of the goods....",
+            "I'm a #PRS_ORG# major customer so it's not a problem for me.")
+  c <- bleu(ref, cand, weights = c(0.25, 0.25, 0.25, 0.25))
+  expect_equal(c, 0.5727104863931309, tolerance = 0.01)
+})
+
+test_that("Test BLEU function on negative example.", {
+  ref <- list(c("That's good.", "Incredible result."))
+  cand <- c("It is great.")
+  c <- bleu(ref, cand, n = 2)
+  expect_equal(c, 0, tolerance = 0.01)
 })

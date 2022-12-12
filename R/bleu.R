@@ -10,7 +10,15 @@ library(checkmate)
 #' @returns Modified data.frame.
 add_cand_length <- function(df) {
   df$cand_len <- unlist(
-    lapply(df$cand_tok_1, function(e) length(e[[1]])))
+    lapply(
+      df$cand_tok_1,
+      function(e) {
+        ifelse(
+          test = anyNA(e[[1]]),
+          yes = 0,
+          no = length(e[[1]]))
+      })
+    )
   return(df)
 }
 
@@ -24,7 +32,10 @@ add_cand_length <- function(df) {
 #' @returns Effective reference length.
 eff_ref_len_atomic <- function(cand_len, reference) {
   # TODO Test
-  ref_lengths <- vapply(reference, length, numeric(1))
+  ref_lengths <- vapply(
+    reference,
+    length,
+    numeric(1))
   ref_length_ind <- which.min(abs(ref_lengths - cand_len))
   return(ref_lengths[[ref_length_ind]])
 }
@@ -144,7 +155,14 @@ mod_prec <- function(df_loc) {
         denominator = (e$denominator + acc$denominator)))},
     sums,
     list(nominator = 0, denominator = 0))
-  if (fraction$denominator == 0) return(0)
+  # TODO: Not covered by tests
+  # BEGIN
+  if (fraction$denominator == 0) {
+    stop(
+      paste("\n\t'-> This error should not have happened.",
+            "Please report to the maintainers."), sep = " ")
+  }
+  # END
   return(fraction$nominator / fraction$denominator)
 }
 
@@ -185,12 +203,21 @@ bleu <- function(ref, cand, n = 4, weights = NA) {
   checkmate::expect_list(ref, types = c("character"))
   checkmate::expect_numeric(n)
 
+  zero_in <- Reduce(
+    function(acc, e) return((e == 0) || acc),
+    unlist(lapply(ref, nchar)),
+    FALSE)
+  if (zero_in) {
+    stop("\n\t'-> It appears there is an empty string in the reference set.")
+  }
+
   df <- construct_df(ref, cand)
-  if (is.na(weights)) {
+  if ((length(weights) == 1) && is.na(weights)) {
     weights <- rep(1, n) / n
   } else {
     checkmate::expect_numeric(weights)
   }
+
   mod_prec_n <- c()
   for (i in seq_len(n)) {
     df <- process_df(df, n = i)
