@@ -155,13 +155,14 @@ mod_prec <- function(df_loc) {
         denominator = (e$denominator + acc$denominator)))},
     sums,
     list(nominator = 0, denominator = 0))
-  print(fraction)
+  # TODO: Not covered by tests
+  # BEGIN
   if (fraction$denominator == 0) {
     stop(
       paste("\n\t'-> This error should not have happened.",
             "Please report to the maintainers."), sep = " ")
-    return(0)
   }
+  # END
   return(fraction$nominator / fraction$denominator)
 }
 
@@ -202,10 +203,9 @@ bleu <- function(ref, cand, n = 4, weights = NA) {
   checkmate::expect_list(ref, types = c("character"))
   checkmate::expect_numeric(n)
 
-  ref_char_len <- unlist(lapply(ref, nchar))
   zero_in <- Reduce(
     function(acc, e) return((e == 0) || acc),
-    ref_char_len,
+    unlist(lapply(ref, nchar)),
     FALSE)
   if (zero_in) {
     stop("\n\t'-> It appears there is an empty string in the reference set.")
