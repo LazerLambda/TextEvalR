@@ -9,8 +9,10 @@ library(checkmate)
 #' @param df data.frame including cand_tok_1 column with tokenized unigrams.
 #' @returns Modified data.frame.
 add_cand_length <- function(df) {
-  df$cand_len <- unlist(
+  cand_len <- unlist(
     lapply(df$cand_tok_1, function(e) length(e[[1]])))
+  # TODO check for NA and change to 0
+  df$cand_len <- cand_len
   return(df)
 }
 
@@ -61,6 +63,8 @@ add_eff_ref_len <- function(df) {
 brevity_penalty <- function(df) {
   r <- sum(df$eff_ref_len)
   c <- sum(df$cand_len)
+  print(c)
+  print(df$cand_len)
   if (c == 0) {
     return(0)
   }

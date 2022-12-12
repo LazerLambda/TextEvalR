@@ -39,6 +39,16 @@ test_that("Test `brevity_penalty`.", {
   expect_equal(brevity_penalty(df), 1)
 })
 
+test_that("Test `brevity_penalty` with empty candidate.", {
+  ref <- list(c("That's good.", "Incredible result."))
+  cand <- c("")
+  df <- construct_df(ref, cand)
+  df <- process_df(df)
+  df <- add_cand_length(df)
+  df <- add_eff_ref_len(df)
+  expect_equal(brevity_penalty(df), 0)
+})
+
 test_that("Test `ref_n_gram_count` for correct clipping of max count", {
   n_grams_list <- tokenizers::tokenize_ngrams(ref[[1]], n = 1)
   counts <- ref_n_gram_count(n_grams_list)
