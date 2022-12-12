@@ -10,8 +10,13 @@ library(checkmate)
 #' @returns Modified data.frame.
 add_cand_length <- function(df) {
   cand_len <- unlist(
-    lapply(df$cand_tok_1, function(e) length(e[[1]])))
-  # TODO check for NA and change to 0
+    lapply(
+      df$cand_tok_1,
+      function(e) ifelse(
+        test = is.na(e[[1]]),
+        yes = 0,
+        no = length(e[[1]]))
+      ))
   df$cand_len <- cand_len
   return(df)
 }
