@@ -9,15 +9,16 @@ library(checkmate)
 #' @param df data.frame including cand_tok_1 column with tokenized unigrams.
 #' @returns Modified data.frame.
 add_cand_length <- function(df) {
-  cand_len <- unlist(
+  df$cand_len <- unlist(
     lapply(
       df$cand_tok_1,
-      function(e) ifelse(
-        test = is.na(e[[1]]),
-        yes = 0,
-        no = length(e[[1]]))
-      ))
-  df$cand_len <- cand_len
+      function(e) {
+        ifelse(
+          test = anyNA(e[[1]]),
+          yes = 0,
+          no = length(e[[1]]))
+      })
+    )
   return(df)
 }
 
@@ -31,7 +32,21 @@ add_cand_length <- function(df) {
 #' @returns Effective reference length.
 eff_ref_len_atomic <- function(cand_len, reference) {
   # TODO Test
-  ref_lengths <- vapply(reference, length, numeric(1))
+  print(reference)
+  ref_lengths <- vapply(
+    reference,
+    length,
+    numeric(1))
+  # print(reference)
+  # ref_lengths <- vapply(
+  #   reference,
+  #   function(e){
+  #     ifelse(
+  #       test = anyNA(e[[1]]),
+  #       yes = 0,
+  #       no = length(e[[1]]))
+  #   },
+  #   numeric(1))
   ref_length_ind <- which.min(abs(ref_lengths - cand_len))
   return(ref_lengths[[ref_length_ind]])
 }
@@ -68,8 +83,6 @@ add_eff_ref_len <- function(df) {
 brevity_penalty <- function(df) {
   r <- sum(df$eff_ref_len)
   c <- sum(df$cand_len)
-  print(c)
-  print(df$cand_len)
   if (c == 0) {
     return(0)
   }
@@ -153,7 +166,11 @@ mod_prec <- function(df_loc) {
         denominator = (e$denominator + acc$denominator)))},
     sums,
     list(nominator = 0, denominator = 0))
-  if (fraction$denominator == 0) return(0)
+  if (fraction$denominator == 0)
+    {
+    print("HIER")
+    return(0)
+  }
   return(fraction$nominator / fraction$denominator)
 }
 
