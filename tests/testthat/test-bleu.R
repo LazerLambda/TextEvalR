@@ -130,6 +130,20 @@ test_that("Test BLEU function based on WMT 22 samples computed by NLTK II.", {
   expect_equal(c, 0.5727104863931309, tolerance = 0.01)
 })
 
+test_that("Test BLEU function based on WMT 22 samples computed by NLTK II with weights.", {
+  ref <- list(c("The goods cost less than 20 euros.",
+                "The merchandise was less than 20 EURO."),
+              c("The fee would equal 40% of the value of the goods...",
+                "The fee corresponds with 40 % of the goods’ value..."),
+              c("I am #PRS_ORG# a serious customer and that is why it is not a problem for me.",
+                "I am a major client of #PRS_ORG# and thus it is no problem for me."))
+  cand <- c("The goods cost less than 20 euros.",
+            "The fee corresponds to 40% of the value of the goods....",
+            "I'm a #PRS_ORG# major customer so it's not a problem for me.")
+  c <- bleu(ref, cand, weights = c(0.25, 0.25, 0.25, 0.25))
+  expect_equal(c, 0.5727104863931309, tolerance = 0.01)
+})
+
 test_that("Test BLEU function on negative example.", {
   ref <- list(c("That's good.", "Incredible result."))
   cand <- c("It is great.")

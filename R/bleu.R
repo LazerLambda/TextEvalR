@@ -186,7 +186,7 @@ bleu <- function(ref, cand, n = 4, weights = NA) {
   checkmate::expect_numeric(n)
 
   df <- construct_df(ref, cand)
-  if (is.na(weights)) {
+  if ((length(weights) == 1) && is.na(weights)) {
     weights <- rep(1, n) / n
   } else {
     checkmate::expect_numeric(weights)
