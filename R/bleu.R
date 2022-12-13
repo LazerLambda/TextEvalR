@@ -1,6 +1,7 @@
 library(tokenizers)
 library(checkmate)
 
+
 #' Add length of Candidates to Dataframe.
 #'
 #' New column is added and filled with length of unigrams of candidate.
@@ -22,6 +23,7 @@ add_cand_length <- function(df) {
   return(df)
 }
 
+
 #' Compute Effective Reference Length for Each Pair.
 #'
 #' Get all length of references and choose the length which is closest to
@@ -39,6 +41,7 @@ eff_ref_len_atomic <- function(cand_len, reference) {
   ref_length_ind <- which.min(abs(ref_lengths - cand_len))
   return(ref_lengths[[ref_length_ind]])
 }
+
 
 #' Add Effective Reference Length to data.frame.
 #'
@@ -60,6 +63,7 @@ add_eff_ref_len <- function(df) {
   )
   return(df)
 }
+
 
 #' Compute Brevity Penalty
 #'
@@ -95,6 +99,7 @@ ref_n_gram_count <- function(ref) {
   res$max_ref <- apply(res[-1], 1, max, na.rm = TRUE)
   return(res[c("Var1", "max_ref")])
 }
+
 
 #' Count and Clip n-grams for a Row.
 #'
@@ -134,6 +139,7 @@ mod_prec_atomic <- function(ref, cand) {
     denominator = sum(combined$Freq)))
 }
 
+
 #' Compute Modified Precision for N-Gram.
 #'
 #' Compute modified precision based on clipped sums from mod_prec_atomic.
@@ -169,7 +175,9 @@ mod_prec <- function(df_loc) {
 
 #' Compute BLEU.
 #'
-#' Compute BLEU for a corpus-based on according to Papineni et al., 2002.
+#' Compute BLEU according to Papineni et al., 2002. This function can be
+#' run by providing a list of sets of references for a vector of candidate
+#' sentences.
 #'
 #' @param ref List of vectors of references.
 #' @param cand Vector of candidate sentences.
