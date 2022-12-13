@@ -20,7 +20,9 @@ size.}
 BLEU-Score for provided corpus.
 }
 \description{
-Compute BLEU for a corpus-based on according to Papineni et al., 2002.
+Compute BLEU according to Papineni et al., 2002. This function can be
+run by providing a list of sets of references for a vector of candidate
+sentences.
 }
 \examples{
 # Corpus
