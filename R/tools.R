@@ -62,5 +62,5 @@ read_ref <- function(files, path = ".") {
     1,
     function(row) c(unname(unlist(row)))
     )
-  unname(as.list(as.data.frame(t(matrix_tmp))))
+  unname(as.list(as.data.frame(matrix_tmp)))
 }
