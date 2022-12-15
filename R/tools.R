@@ -11,8 +11,10 @@ library(checkmate)
 #' @export
 #' @examples
 #' # READ FILE
-#' path_cand <- "path2cand"
-#' cand <- read_cand(path_cand)
+#' cand_name <- "cand"
+#' write(c("ab", "cd"), cand_name)
+#' cand <- read_cand(cand_name)
+#' file.remove(cand_name)
 read_cand <- function(path) {
   checkmate::expect_character(path, max.len = 1)
   readLines(path)
@@ -30,20 +32,20 @@ read_cand <- function(path) {
 #' @export
 #' @examples
 #' # READ FILES
-#' parent_folder <- "path/to/references"
-#' path_ref_A <- "path2fileA"
-#' path_ref_B <- "path2fileB"
-#' ref <- read_ref(c(path_ref_A, path_ref_B), path = parent_folder)
+#' # parent_folder <- "path/to/references"
+#' # path_ref_A <- "path2fileA"
+#' # path_ref_B <- "path2fileB"
+#' # ref <- read_ref(c(path_ref_A, path_ref_B), path = parent_folder)
 #'
 #' # READ FILES FROM SAME FOLDER
-#' path_ref_A <- "path2fileA"
-#' path_ref_B <- "path2fileB"
-#' ref <- read_ref(c(path_ref_A, path_ref_B))
+#' # path_ref_A <- "path2fileA"
+#' # path_ref_B <- "path2fileB"
+#' # ref <- read_ref(c(path_ref_A, path_ref_B))
 #'
 #' # READ FILES WITH ABSOLUTE PATHS
-#' path_ref_A_abs <- "abs/path/path2fileA"
-#' path_ref_B_abs <- "abs/path/path2fileB"
-#' ref <- read_ref(c(path_ref_A_abs, path_ref_B_abs), path = "")
+#' # path_ref_A_abs <- "abs/path/path2fileA"
+#' # path_ref_B_abs <- "abs/path/path2fileB"
+#' # ref <- read_ref(c(path_ref_A_abs, path_ref_B_abs), path = "")
 read_ref <- function(files, path = ".") {
   checkmate::expect_character(path, max.len = 1)
   checkmate::expect_character(files)

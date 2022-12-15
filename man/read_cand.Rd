@@ -19,6 +19,8 @@ system's output. The function is a wrapper for the `readLines` function.
 }
 \examples{
 # READ FILE
-path_cand <- "path2cand"
-cand <- read_cand(path_cand)
+cand_name <- "cand"
+write(c("ab", "cd"), cand_name)
+cand <- read_cand(cand_name)
+file.remove(cand_name)
 }
