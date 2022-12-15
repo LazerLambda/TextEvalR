@@ -24,6 +24,22 @@ read_cand <- function(path) {
 #' @param path Parent folder for files.
 #' @returns List including vectors of reference sentences.
 #' @export
+#' @examples
+#' # READ FILES
+#' parent_folder <- "path/to/references"
+#' path_ref_A <- "path2fileA"
+#' path_ref_B <- "path2fileB"
+#' ref <- read_ref(c(path_ref_A, path_ref_B), path = parent_folder)
+#'
+#' # READ FILES FROM SAME FOLDER
+#' path_ref_A <- "path2fileA"
+#' path_ref_B <- "path2fileB"
+#' ref <- read_ref(c(path_ref_A, path_ref_B))
+#'
+#' # READ FILES WITH ABSOLUTE PATHS
+#' path_ref_A_abs <- "abs/path/path2fileA"
+#' path_ref_B_abs <- "abs/path/path2fileB"
+#' ref <- read_ref(c(path_ref_A_abs, path_ref_B_abs), path = "")
 read_ref <- function(files, path = ".") {
   checkmate::expect_character(path, max.len = 1)
   checkmate::expect_character(files)
