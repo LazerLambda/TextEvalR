@@ -17,3 +17,8 @@ Helper function to conveniently read the candidate sentences from a file.
 The file must be of the format in which each line refers to a
 system's output. The function is a wrapper for the `readLines` function.
 }
+\examples{
+# READ FILE
+path_cand <- "path2cand"
+cand <- read_cand(path_cand)
+}

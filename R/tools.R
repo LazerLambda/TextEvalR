@@ -9,6 +9,10 @@ library(checkmate)
 #' @param path Absolute path to the candidates text file.
 #' @returns Vector of candidate sentences.
 #' @export
+#' @examples
+#' # READ FILE
+#' path_cand <- "path2cand"
+#' cand <- read_cand(path_cand)
 read_cand <- function(path) {
   checkmate::expect_character(path, max.len = 1)
   readLines(path)
